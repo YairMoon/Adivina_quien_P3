@@ -1,0 +1,20 @@
+{
+  "personajes_extra": [
+    {
+      "nombre": "Groot",
+      "atributos": {
+        "armadura": false,
+        "poderes": true,
+        "vengador": false,
+        "villano": false,
+        "usa_arma": false,
+        "humano": false,
+        "dios": false,
+        "magia": false,
+        "alien": false,
+        "robot": false,
+        "mutante": false
+      }
+    }
+  ]
+}
