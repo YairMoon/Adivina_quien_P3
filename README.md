@@ -1,5 +1,6 @@
 # Adivina_quien_P3
-![Portada del juego](https://github.com/YairMoon/Adivina_quien_P3/blob/main/images/portada.png?raw=true)
+![Portada del juego](./portada.png)
+
 
 
 Adivina quien (personajes de marvel)
