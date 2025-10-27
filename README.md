@@ -1,4 +1,7 @@
 # Adivina_quien_P3
+![Portada del juego](https://github.com/YairMoon/Adivina_quien_P3/blob/main/images/portada.png?raw=true)
+
+
 Adivina quien (personajes de marvel)
 Adivina Quién – MARVEL (SHIELD Scanner) es un sistema experto interactivo inspirado en el clásico juego de “Adivina Quién”, pero llevado al universo de superhéroes y villanos de Marvel.
 
