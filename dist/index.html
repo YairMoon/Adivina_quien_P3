@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Adivina Quién - MARVEL // S.H.I.E.L.D. Scanner Web</title>
+
+<style>
+    body {
+        background-color: #0b0c10;
+        color: #ffffff;
+        font-family: "Helvetica", Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        min-height: 100vh;
+    }
+
+    /* panel izquierdo */
+    .left-panel {
+        flex: 1;
+        padding: 20px 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: #0b0c10;
+    }
+
+    /* ----------- LOGO MARVEL STYLE ----------- */
+    .marvel-logo-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .marvel-logo-box {
+        background-color: #c3073f; /* rojo fuerte */
+        border: 2px solid #ff1e1e;
+        padding: 8px 14px;
+        line-height: 1;
+        display: inline-block;
+        box-shadow: 0 0 12px rgba(255, 0, 0, 0.4);
+    }
+
+    .marvel-logo-text {
+        font-weight: 900;
+        font-family: Impact, "Arial Black", sans-serif;
+        font-size: 28px;
+        color: #ffffff;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        /* simulamos borde negro interno con text-shadow múltiple */
+        text-shadow:
+            -1px -1px 0 #000000,
+            1px -1px 0 #000000,
+            -1px 1px 0 #000000,
+            1px 1px 0 #000000;
+    }
+
+    .game-title-text {
+        margin-top: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        color: #ff1e1e;
+        text-align: center;
+        text-shadow: 0 0 8px rgba(255,30,30,0.6);
+    }
+
+    .subtitle {
+        color: #45a29e;
+        font-size: 13px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    #message-box {
+        background-color: #1f2833;
+        border: 2px solid #45a29e;
+        border-radius: 8px;
+        padding: 16px;
+        width: 100%;
+        max-width: 480px;
+        text-align: center;
+        white-space: pre-line;
+        min-height: 140px;
+        font-size: 15px;
+        line-height: 1.4;
+    }
+
+    .controls-row {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    button {
+        cursor: pointer;
+        border: none;
+        font-size: 14px;
+        font-weight: bold;
+        padding: 12px 16px;
+        border-radius: 8px;
+        min-width: 120px;
+        transition: all 0.15s;
+    }
+
+    #btn-start {
+        background-color: #45a29e;
+        color: #0b0c10;
+    }
+    #btn-start:hover { filter: brightness(1.15); }
+
+    #btn-restart {
+        background-color: #222222;
+        color: #ffffff;
+    }
+    #btn-restart:hover { filter: brightness(1.2); }
+
+    #btn-yes, #btn-confirm-yes {
+        background-color: #45a29e;
+        color: white;
+    }
+    #btn-yes:hover, #btn-confirm-yes:hover { filter: brightness(1.15); }
+
+    #btn-no, #btn-confirm-no {
+        background-color: #c3073f;
+        color: white;
+    }
+    #btn-no:hover, #btn-confirm-no:hover { filter: brightness(1.15); }
+
+    .status-text {
+        font-size: 13px;
+        margin-top: 16px;
+        color: #c5c6c7;
+        text-align: center;
+        min-height: 20px;
+    }
+
+    .footer-note {
+        font-size: 11px;
+        color: #c5c6c7;
+        margin-top: auto;
+        text-align: center;
+        opacity: 0.8;
+    }
+
+    /* panel derecho */
+    .right-panel {
+        width: 260px;
+        background-color: #1f2833;
+        border-left: 2px solid #45a29e;
+        display: flex;
+        flex-direction: column;
+        padding: 16px;
+    }
+
+    .panel-title {
+        color: #66fcf1;
+        font-size: 14px;
+        font-weight: bold;
+        text-align: center;
+        margin: 0;
+    }
+
+    .panel-sub {
+        color: #c5c6c7;
+        font-size: 12px;
+        text-align: center;
+        margin-top: 4px;
+        margin-bottom: 12px;
+    }
+
+    .candidate-box {
+        flex: 1;
+        background-color: #0b0c10;
+        border: 1px solid #45a29e;
+        border-radius: 6px;
+        padding: 8px;
+        font-family: Consolas, monospace;
+        font-size: 13px;
+        color: #ffffff;
+        overflow-y: auto;
+        line-height: 1.4;
+        white-space: pre-line;
+    }
+
+    .scanner-footer {
+        font-size: 12px;
+        font-weight: bold;
+        text-align: center;
+        color: #66fcf1;
+        margin-top: 12px;
+        min-height: 32px;
+        white-space: pre-line;
+    }
+
+    /* confirmación final tipo "¿Adiviné correctamente?" */
+    #confirm-row {
+        display: none;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    /* input de texto al final cuando hay varios candidatos */
+    #manual-choice-container {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    #manual-choice-input {
+        padding: 8px 10px;
+        border-radius: 6px;
+        border: 1px solid #45a29e;
+        background-color: #0b0c10;
+        color: #ffffff;
+        min-width: 220px;
+        font-size: 14px;
+        text-align: center;
+    }
+
+    #manual-choice-btn {
+        background-color: #45a29e;
+        color: #0b0c10;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        padding: 10px 14px;
+        cursor: pointer;
+    }
+    #manual-choice-btn:hover { filter: brightness(1.15); }
+
+    /* aprendizaje */
+    #learning-container {
+        display: none;
+        background-color: #1f2833;
+        border: 2px solid #ff1e1e;
+        border-radius: 8px;
+        padding: 16px;
+        margin-top: 20px;
+        width: 100%;
+        max-width: 480px;
+        text-align: center;
+        box-shadow: 0 0 12px rgba(255,0,0,0.4);
+    }
+
+    #learning-question {
+        font-size: 14px;
+        white-space: pre-line;
+    }
+
+    #learning-buttons {
+        margin-top: 15px;
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    #learning-yes {
+        background-color:#45a29e;
+        color:white;
+        border:none;
+        border-radius:6px;
+        font-weight:bold;
+        padding:10px 14px;
+        cursor:pointer;
+    }
+    #learning-yes:hover { filter:brightness(1.15); }
+
+    #learning-no {
+        background-color:#c3073f;
+        color:white;
+        border:none;
+        border-radius:6px;
+        font-weight:bold;
+        padding:10px 14px;
+        cursor:pointer;
+    }
+    #learning-no:hover { filter:brightness(1.15); }
+
+    #learn-finish-msg {
+        font-size: 13px;
+        color: #66fcf1;
+        white-space: pre-line;
+        margin-top: 10px;
+        min-height: 32px;
+    }
+</style>
+</head>
+<body>
+
+<div class="left-panel">
+
+    <!-- Logo estilo Marvel -->
+    <div class="marvel-logo-wrapper">
+        <div class="marvel-logo-box">
+            <div class="marvel-logo-text">MARVEL</div>
+        </div>
+        <div class="game-title-text">Adivina Quién</div>
+    </div>
+
+    <div class="subtitle">
+        Unidad de Reconocimiento S.H.I.E.L.D. (Web Scanner)
+    </div>
+
+    <div id="message-box">
+        Piensa en un personaje del universo Marvel.
+        Yo intentaré identificarlo haciendo preguntas.
+
+        Da clic en "Iniciar Escaneo" para comenzar.
+    </div>
+
+    <div class="controls-row">
+        <button id="btn-start">Iniciar Escaneo</button>
+        <button id="btn-restart">Reiniciar</button>
+    </div>
+
+    <div class="controls-row" id="yn-row" style="display:none;">
+        <button id="btn-yes">Sí</button>
+        <button id="btn-no">No</button>
+    </div>
+
+    <div id="confirm-row">
+        <button id="btn-confirm-yes">Sí, adivinaste</button>
+        <button id="btn-confirm-no">No, no era ese</button>
+    </div>
+
+    <div id="manual-choice-container">
+        <div style="color:#ffffff; font-size:14px; line-height:1.4;">
+            ¿Tu personaje está en la lista de candidatos?
+            Escribe el nombre EXACTO:
+        </div>
+        <input id="manual-choice-input" type="text" placeholder="Ej. Spider-Man" />
+        <button id="manual-choice-btn">Confirmar personaje</button>
+    </div>
+
+    <div id="learning-container">
+        <div id="learning-question"></div>
+        <div id="learning-buttons">
+            <button id="learning-yes">Sí</button>
+            <button id="learning-no">No</button>
+        </div>
+        <div id="learn-finish-msg"></div>
+    </div>
+
+    <div id="status" class="status-text">Listo.</div>
+
+    <div class="footer-note">
+        Proyecto - Sistemas Experto / Adivina Quién Marvel (versión Web con aprendizaje local)
+    </div>
+</div>
+
+<div class="right-panel">
+    <div class="panel-title">S.H.I.E.L.D. SCANNER vWEB</div>
+    <div id="candidates-count" class="panel-sub">Candidatos activos: --</div>
+
+    <div id="candidates-box" class="candidate-box">
+        (sin datos)
+    </div>
+
+    <div id="target-status" class="scanner-footer">
+        Estado objetivo: [ inactivo ]
+    </div>
+</div>
+
+<script>
+/* ==========================================================
+   1. Persistencia tipo JSON usando localStorage (web)
+   ========================================================== */
+function cargarExtraDesdeLocalStorage() {
+    const raw = localStorage.getItem("personajes_extra_marvel");
+    if (!raw) return [];
+    try {
+        return JSON.parse(raw);
+    } catch(e) {
+        return [];
+    }
+}
+
+function guardarExtraEnLocalStorage(arr) {
+    localStorage.setItem("personajes_extra_marvel", JSON.stringify(arr));
+}
+
+/* ==========================================================
+   2. Base de personajes (misma que Python extendida)
+   ========================================================== */
+const personajesBase = [
+    {
+        nombre: "Iron Man",
+        atributos: {
+            armadura: true,
+            poderes: false,
+            vengador: true,
+            villano: false,
+            usa_arma: true,
+            humano: true,
+            dios: false,
+            magia: false,
+            alien: false,
+            robot: false,
+            mutante: false,
+            tecnologia_avanzada: true,
+            trepa_paredes: false,
+            tamaño_variable: false,
+            xmen: false,
+            guardianes: false,
+            hechiceria: false,
+            garras: false
+        }
+    },
+    {
+        nombre: "Captain America",
+        atributos: {
+            armadura: false,
+            poderes: true,
+            vengador: true,
+            villano: false,
+            usa_arma: true,
+            humano: true,
+            dios: false,
+            magia: false,
+            alien: false,
+            robot: false,
+            mutante: false,
+            tecnologia_avanzada: false,
+            trepa_paredes: false,
+            tamaño_variable: false,
+            xmen: false,
+            guardianes: false,
+            hechiceria: false,
+            garras: false
+        }
+    },
+    {
+        nombre: "Thor",
+        atributos: {
+            armadura: false,
+            poderes: true,
+            vengador: true,
+            villano: false,
+            usa_arma: true,
+            humano: true,
+            dios: true,
+            magia: false,
+            alien: false,
+            robot: false,
+            mutante: false,
+            tecnologia_avanzada: false,
+            trepa_paredes: false,
+            tamaño_variable: false,
+            xmen: false,
+            guardianes: false,
+            hechiceria: false,
+            garras: false
+        }
+    },
+    {
+        nombre: "Hulk",
+        atributos: {
+            armadura: false,
+            poderes: true,
+            vengador: true,
+            villano: false,
+            usa_arma: false,
+            humano: true,
+            dios: false,
+            magia: false,
+            alien: false,
+            robot: false,
+            mutante: false,
+            tecnologia_avanzada: false,
+            trepa_paredes: false,
+            tamaño_variable: false,
+            xmen: false,
+            guardianes: false,
+            hechiceria: false,
+            garras: false
+        }
+    },
+    {
+        nombre: "Black Widow",
+        atributos: {
+            armadura: false,
+            poderes: false,
+            vengador: true,
+            villano: false,
+            usa_arma: true,
+            humano: true,
+            dios: false,
+            magia: false,
+            alien: false,
+            robot: false,
+            mutante: false,
+            tecnologia_avanzada: false,
+            trepa_paredes: false,
+            tamaño_variable: false,
+            xmen: false,
+            guardianes: false,
+            hechiceria: false,
+            garras: false
+        }
+    },
+    {
+        nombre: "Spider-Man",
+        atributos: {
+            armadura: false,
+            poderes: true,
+            vengador: true,
+            villano: false,
+            usa_arma: false,
+            humano: true,
+            dios: false,
+            magia: false,
+            alien: false,
+            robot: false,
+            mutante: false,
+            tecnologia_avanzada: true,
+            trepa_paredes: true,
+            tamaño_variable: false,
+            xmen: false,
+            guardianes: false,
+            hechiceria: false,
+            garras: false
+        }
+    },
+    {
+        nombre: "Doctor Strange",
+        atributos: {
+            armadura: false,
+            poderes: true,
+            vengador: true,
+            villano: false,
+            usa_arma: false,
+            humano: true,
+            dios: false,
+            magia: true,
+            alien: false,
+            robot: false,
+            mutante: false,
+            tecnologia_avanzada: false,
+            trepa_paredes: false,
+            tamaño_variable: false,
+            xmen: false,
+            guardianes: false,
+            hechiceria: true,
+            garras: false
+        }
+    },
+    {
+        nombre: "Thanos",
+        atributos: {
+            armadura: true,
+            poderes: false,
+            vengador: false,
+            villano: true,
+            usa_arma: true,
+            humano: false,
+            dios: false,
+            magia: false,
+            alien: true,
+            robot: false,
+            mutante: false,
+            tecnologia_avanzada: false,
+            trepa_paredes: false,
+            tamaño_variable: false,
+            xmen: false,
+            guardianes: false,
+            hechiceria: false,
+            garras: false
+        }
+    },
+    {
+        nombre: "Loki",
+        atributos: {
+            armadura: false,
+            poderes: false,
+            vengador: false,
+            villano: true,
+            usa_arma: true,
+            humano: true,
+            dios: true,
+            magia: true,
+            alien: false,
+            robot: false,
+            mutante: false,
+            tecnologia_avanzada: false,
+            trepa_paredes: false,
+            tamaño_variable: false,
+            xmen: false,
+            guardianes: false,
+            hechiceria: true,
+            garras: false
+        }
+    },
+    {
+        nombre: "Ultron",
+        atributos: {
+            armadura: true,
+            poderes: false,
+            vengador: false,
+            villano: true,
+            usa_arma: true,
+            humano: false,
+            dios: false,
+            magia: false,
+            alien: false,
+            robot: true,
+            mutante: false,
+            tecnologia_avanzada: true,
+            trepa_paredes: false,
+            tamaño_variable: false,
+            xmen: false,
+            guardianes: false,
+            hechiceria: false,
+            garras: false
+        }
+    },
+    {
+        nombre: "Black Panther",
+        atributos: {
+            armadura: true,
+            poderes: true,
+            vengador: true,
+            villano: false,
+            usa_arma: true,
+            humano: true,
+            dios: false,
+            magia: false,
+            alien: false,
+            robot: false,
+            mutante: false,
+            tecnologia_avanzada: false,
+            trepa_paredes: false,
+            tamaño_variable: false,
+            xmen: false,
+            guardianes: false,
+            hechiceria: false,
+            garras: true
+        }
+    },
+    {
+        nombre: "Scarlet Witch",
+        atributos: {
+            armadura: false,
+            poderes: true,
+            vengador: true,
+            villano: false,
+            usa_arma: false,
+            humano: true,
+            dios: false,
+            magia: true,
+            alien: false,
+            robot: false,
+            mutante: false,
+            tecnologia_avanzada: false,
+            trepa_paredes: false,
+            tamaño_variable: false,
+            xmen: false,
+            guardianes: false,
+            hechiceria: true,
+            garras: false
+        }
+    },
+    {
+        nombre: "Ant-Man",
+        atributos: {
+            armadura: false,
+            poderes: true,
+            vengador: true,
+            villano: false,
+            usa_arma: false,
+            humano: true,
+            dios: false,
+            magia: false,
+            alien: false,
+            robot: false,
+            mutante: false,
+            tecnologia_avanzada: true,
+            trepa_paredes: false,
+            tamaño_variable: true,
+            xmen: false,
+            guardianes: false,
+            hechiceria: false,
+            garras: false
+        }
+    },
+    {
+        nombre: "Deadpool",
+        atributos: {
+            armadura: false,
+            poderes: true,
+            vengador: false,
+            villano: false,
+            usa_arma: true,
+            humano: false,
+            dios: false,
+            magia: false,
+            alien: false,
+            robot: false,
+            mutante: true,
+            tecnologia_avanzada: false,
+            trepa_paredes: false,
+            tamaño_variable: false,
+            xmen: false,
+            guardianes: false,
+            hechiceria: false,
+            garras: false
+        }
+    },
+    {
+        nombre: "Wolverine",
+        atributos: {
+            armadura: false,
+            poderes: true,
+            vengador: false,
+            villano: false,
+            usa_arma: true,
+            humano: false,
+            dios: false,
+            magia: false,
+            alien: false,
+            robot: false,
+            mutante: true,
+            tecnologia_avanzada: false,
+            trepa_paredes: false,
+            tamaño_variable: false,
+            xmen: true,
+            guardianes: false,
+            hechiceria: false,
+            garras: true
+        }
+    },
+    {
+        nombre: "Magneto",
+        atributos: {
+            armadura: false,
+            poderes: true,
+            vengador: false,
+            villano: true,
+            usa_arma: false,
+            humano: false,
+            dios: false,
+            magia: false,
+            alien: false,
+            robot: false,
+            mutante: true,
+            tecnologia_avanzada: false,
+            trepa_paredes: false,
+            tamaño_variable: false,
+            xmen: true,
+            guardianes: false,
+            hechiceria: false,
+            garras: false
+        }
+    },
+    {
+        nombre: "Venom",
+        atributos: {
+            armadura: false,
+            poderes: true,
+            vengador: false,
+            villano: true,
+            usa_arma: false,
+            humano: false,
+            dios: false,
+            magia: false,
+            alien: true,
+            robot: false,
+            mutante: false,
+            tecnologia_avanzada: false,
+            trepa_paredes: true,
+            tamaño_variable: false,
+            xmen: false,
+            guardianes: false,
+            hechiceria: false,
+            garras: true
+        }
+    },
+    {
+        nombre: "Gamora",
+        atributos: {
+            armadura: false,
+            poderes: false,
+            vengador: false,
+            villano: false,
+            usa_arma: true,
+            humano: false,
+            dios: false,
+            magia: false,
+            alien: true,
+            robot: false,
+            mutante: false,
+            tecnologia_avanzada: false,
+            trepa_paredes: false,
+            tamaño_variable: false,
+            xmen: false,
+            guardianes: true,
+            hechiceria: false,
+            garras: false
+        }
+    },
+    {
+        nombre: "Vision",
+        atributos: {
+            armadura: false,
+            poderes: true,
+            vengador: true,
+            villano: false,
+            usa_arma: false,
+            humano: false,
+            dios: false,
+            magia: false,
+            alien: false,
+            robot: false,
+            mutante: false,
+            tecnologia_avanzada: false,
+            trepa_paredes: false,
+            tamaño_variable: false,
+            xmen: false,
+            guardianes: false,
+            hechiceria: false,
+            garras: false
+        }
+    }
+];
+
+// atributos que el sistema pregunta (mismo orden de Python: sacamos las llaves del primero)
+const atributosOrden = Object.keys(personajesBase[0].atributos);
+
+/* ==========================================================
+   3. Estado del juego
+   ========================================================== */
+let posibles = [];
+let preguntasHechas = [];
+let atributoActual = null;
+let juegoTerminado = false;
+
+let aprendiendo = false;            // modo aprendizaje activo
+let nuevoNombre = "";               // nombre del nuevo personaje
+let nuevosAtributos = {};           // sus atributos
+let indiceAtributoAprendizaje = 0;  // índice en atributosOrden
+
+/* ==========================================================
+   4. Referencias a la UI
+   ========================================================== */
+const messageBox = document.getElementById("message-box");
+const statusBox = document.getElementById("status");
+const candidatesBox = document.getElementById("candidates-box");
+const candidatesCount = document.getElementById("candidates-count");
+const targetStatus = document.getElementById("target-status");
+
+const startBtn = document.getElementById("btn-start");
+const restartBtn = document.getElementById("btn-restart");
+const yesBtn = document.getElementById("btn-yes");
+const noBtn = document.getElementById("btn-no");
+
+const ynRow = document.getElementById("yn-row");
+const confirmRow = document.getElementById("confirm-row");
+const confirmYesBtn = document.getElementById("btn-confirm-yes");
+const confirmNoBtn = document.getElementById("btn-confirm-no");
+
+const manualChoiceContainer = document.getElementById("manual-choice-container");
+const manualChoiceInput = document.getElementById("manual-choice-input");
+const manualChoiceBtn = document.getElementById("manual-choice-btn");
+
+const learningContainer = document.getElementById("learning-container");
+const learningQuestion = document.getElementById("learning-question");
+const learningButtons = document.getElementById("learning-buttons");
+const learningYesBtn = document.getElementById("learning-yes");
+const learningNoBtn = document.getElementById("learning-no");
+const learnFinishMsg = document.getElementById("learn-finish-msg");
+
+/* ==========================================================
+   5. Funciones lógicas (match con la versión Python)
+   ========================================================== */
+function refrescarScanner() {
+    candidatesBox.innerText = "";
+    posibles.forEach(p => {
+        candidatesBox.innerText += "• " + p.nombre + "\n";
+    });
+    candidatesCount.innerText = "Candidatos activos: " + posibles.length;
+}
+
+function aplicarRegla(lista, atributo, respuestaBool) {
+    return lista.filter(p => {
+        const val = p.atributos[atributo];
+        return val === respuestaBool;
+    });
+}
+
+function seleccionarMejorPregunta(cands, usados) {
+    let mejor = null;
+    let mejorDiff = cands.length;
+
+    atributosOrden.forEach(atr => {
+        if (usados.includes(atr)) return;
+
+        let positivos = 0;
+        let negativos = 0;
+        cands.forEach(p => {
+            const v = p.atributos[atr];
+            if (v === true) positivos++;
+            if (v === false) negativos++;
+        });
+
+        if (positivos + negativos === 0) return;
+
+        const diff = Math.abs(positivos - negativos);
+        if (diff < mejorDiff) {
+            mejorDiff = diff;
+            mejor = atr;
+        }
+    });
+
+    return mejor;
+}
+
+function hayPreguntaDiscriminante(cands, usados) {
+    for (let atr of atributosOrden) {
+        if (usados.includes(atr)) continue;
+
+        let positivos = 0;
+        let negativos = 0;
+        cands.forEach(p => {
+            const v = p.atributos[atr];
+            if (v === true) positivos++;
+            if (v === false) negativos++;
+        });
+
+        if (positivos > 0 && negativos > 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function resumenPersonaje(p) {
+    const a = p.atributos;
+    const tags = [];
+    if (a.vengador) tags.push("Vengador");
+    if (a.villano) tags.push("Villano");
+    if (a.mutante) tags.push("Mutante");
+    if (a.alien) tags.push("Alien");
+    if (a.robot) tags.push("Sintético");
+    if (a.dios) tags.push("Dios");
+    if (a.magia || a.hechiceria) tags.push("Místico");
+    if (a.guardianes) tags.push("Guardián");
+    if (a.xmen) tags.push("X-Men");
+    if (a.garras) tags.push("Garras");
+    if (a["tamaño_variable"]) tags.push("Cambio de tamaño");
+    if (a.trepa_paredes) tags.push("Trepa paredes");
+    if (tags.length === 0) tags.push("Independiente");
+
+    return p.nombre + "\nPerfil: " + tags.join(" / ");
+}
+
+/* ==========================================================
+   6. Flujo principal
+   ========================================================== */
+function iniciarJuego() {
+    juegoTerminado = false;
+    aprendiendo = false;
+    confirmRow.style.display = "none";
+    manualChoiceContainer.style.display = "none";
+    learningContainer.style.display = "none";
+
+    const extra = cargarExtraDesdeLocalStorage();
+    posibles = JSON.parse(JSON.stringify(personajesBase.concat(extra)));
+
+    preguntasHechas = [];
+    atributoActual = null;
+
+    startBtn.style.display = "none";
+    ynRow.style.display = "flex";
+
+    statusBox.innerText = "Escaneo en progreso... responde con sinceridad 😏";
+    targetStatus.innerText = "Estado objetivo: [ escaneando... ]";
+    targetStatus.style.color = "#66fcf1";
+
+    nuevaPregunta();
+    refrescarScanner();
+}
+
+function reiniciarJuego() {
+    juegoTerminado = false;
+    aprendiendo = false;
+
+    startBtn.style.display = "inline-block";
+    ynRow.style.display = "none";
+    confirmRow.style.display = "none";
+    manualChoiceContainer.style.display = "none";
+    learningContainer.style.display = "none";
+
+    messageBox.innerText =
+        "Piensa en un personaje del universo Marvel.\n" +
+        "Yo intentaré identificarlo haciendo preguntas.\n\n" +
+        "Da clic en \"Iniciar Escaneo\" para comenzar.";
+
+    statusBox.innerText = "Listo.";
+    targetStatus.innerText = "Estado objetivo: [ inactivo ]";
+    targetStatus.style.color = "#66fcf1";
+
+    const extra = cargarExtraDesdeLocalStorage();
+    posibles = personajesBase.concat(extra);
+    refrescarScanner();
+}
+
+function nuevaPregunta() {
+    if (posibles.length <= 1) {
+        finalizar();
+        return;
+    }
+    if (!hayPreguntaDiscriminante(posibles, preguntasHechas)) {
+        finalizar();
+        return;
+    }
+
+    atributoActual = seleccionarMejorPregunta(posibles, preguntasHechas);
+    if (!atributoActual) {
+        finalizar();
+        return;
+    }
+    preguntasHechas.push(atributoActual);
+
+    messageBox.innerText =
+        "¿El objetivo cumple con:\n'" + atributoActual + "' ?";
+    statusBox.innerText = "Coincidencias actuales: " + posibles.length;
+
+    refrescarScanner();
+}
+
+function responder(valorBool) {
+    if (juegoTerminado || aprendiendo) return;
+
+    posibles = aplicarRegla(posibles, atributoActual, valorBool);
+    refrescarScanner();
+
+    if (posibles.length <= 1) {
+        finalizar();
+    } else {
+        nuevaPregunta();
+    }
+}
+
+/* ==========================================================
+   7. Finalizar (igual a Python: acierto, lista ambigua, aprendizaje)
+   ========================================================== */
+function finalizar() {
+    if (juegoTerminado) return;
+    juegoTerminado = true;
+
+    ynRow.style.display = "none"; // ocultar Sí/No de atributos
+
+    if (posibles.length === 1) {
+        const pj = posibles[0];
+        const ficha = resumenPersonaje(pj);
+
+        messageBox.innerText =
+            "Identidad detectada:\n" + ficha +
+            "\n\n¿Adiviné correctamente?";
+        statusBox.innerText = "Selecciona una opción abajo.";
+
+        if (pj.atributos.villano === true) {
+            targetStatus.innerText = "Estado objetivo: AMENAZA";
+            targetStatus.style.color = "#ff1e1e";
+        } else {
+            targetStatus.innerText = "Estado objetivo: ALIADO";
+            targetStatus.style.color = "#45a29e";
+        }
+
+        confirmRow.style.display = "flex";
+
+        confirmYesBtn.onclick = () => {
+            messageBox.innerText =
+                "Objetivo confirmado.\nBase de conocimiento intacta.";
+            statusBox.innerText =
+                "Gracias por colaborar con S.H.I.E.L.D.";
+            confirmRow.style.display = "none";
+        };
+
+        confirmNoBtn.onclick = () => {
+            confirmRow.style.display = "none";
+            iniciarAprendizajeFlujo();
+        };
+
+    } else if (posibles.length > 1) {
+        const nombres = posibles.map(p => "• " + p.nombre).join("\n");
+        messageBox.innerText =
+            "Posibles coincidencias:\n" + nombres +
+            "\n\n¿Tu personaje está en esta lista?\n" +
+            "(Si SÍ, escríbelo EXACTO abajo.\nSi NO, deja el campo vacío y presiona Confirmar.)";
+
+        statusBox.innerText =
+            "Escribe el nombre EXACTO o deja vacío si no está.";
+        targetStatus.innerText = "Estado objetivo: AMBIGUO";
+        targetStatus.style.color = "#ffcc00";
+
+        manualChoiceContainer.style.display = "flex";
+
+        manualChoiceBtn.onclick = () => {
+            const elegido = manualChoiceInput.value.trim().toLowerCase();
+            manualChoiceInput.value = "";
+
+            if (!elegido) {
+                manualChoiceContainer.style.display = "none";
+                iniciarAprendizajeFlujo();
+                return;
+            }
+
+            let match = null;
+            for (const p of posibles) {
+                if (p.nombre.toLowerCase() === elegido) {
+                    match = p;
+                    break;
+                }
+            }
+
+            if (match) {
+                const ficha = resumenPersonaje(match);
+                messageBox.innerText =
+                    "Identidad confirmada manualmente:\n" + ficha;
+                statusBox.innerText =
+                    "Gracias. Registrado como coincidencia conocida.";
+
+                targetStatus.innerText =
+                    match.atributos.villano
+                        ? "Estado objetivo: AMENAZA"
+                        : "Estado objetivo: ALIADO";
+                targetStatus.style.color =
+                    match.atributos.villano ? "#ff1e1e" : "#45a29e";
+
+                manualChoiceContainer.style.display = "none";
+            } else {
+                manualChoiceContainer.style.display = "none";
+                iniciarAprendizajeFlujo();
+            }
+        };
+
+    } else {
+        messageBox.innerText =
+            "No pude identificar al objetivo.\n" +
+            "Parece que no está en mi base.\n\n" +
+            "Entréname con ese personaje.";
+        statusBox.innerText = "Iniciando aprendizaje.";
+        targetStatus.innerText = "Estado objetivo: DESCONOCIDO";
+        targetStatus.style.color = "#ff1e1e";
+
+        iniciarAprendizajeFlujo();
+    }
+}
+
+/* ==========================================================
+   8. Aprendizaje (localStorage) -> como tu JSON en Python
+   ========================================================== */
+function iniciarAprendizajeFlujo() {
+    aprendiendo = true;
+    ynRow.style.display = "none";
+    confirmRow.style.display = "none";
+    manualChoiceContainer.style.display = "none";
+
+    nuevoNombre = prompt("¿Cuál era tu personaje?");
+    if (!nuevoNombre) {
+        messageBox.innerText =
+            "No se proporcionó nombre.\nNo se aprendió nada nuevo.";
+        statusBox.innerText = "Entrenamiento cancelado.";
+        aprendiendo = false;
+        return;
+    }
+
+    nuevosAtributos = {};
+    indiceAtributoAprendizaje = 0;
+
+    messageBox.innerText =
+        "Te voy a hacer preguntas de SÍ / NO\n" +
+        "para aprender a " + nuevoNombre + ".";
+    statusBox.innerText = "Entrenamiento en curso…";
+
+    mostrarPreguntaAprendizajeActual();
+}
+
+function mostrarPreguntaAprendizajeActual() {
+    if (indiceAtributoAprendizaje >= atributosOrden.length) {
+        terminarAprendizaje();
+        return;
+    }
+
+    const atr = atributosOrden[indiceAtributoAprendizaje];
+
+    learningContainer.style.display = "block";
+    learningButtons.style.display = "flex";
+    learnFinishMsg.innerText = "";
+
+    learningQuestion.innerText =
+        "¿" + nuevoNombre + " cumple '" + atr + "' ?";
+
+    learningYesBtn.onclick = () => {
+        nuevosAtributos[atr] = true;
+        indiceAtributoAprendizaje++;
+        mostrarPreguntaAprendizajeActual();
+    };
+
+    learningNoBtn.onclick = () => {
+        nuevosAtributos[atr] = false;
+        indiceAtributoAprendizaje++;
+        mostrarPreguntaAprendizajeActual();
+    };
+}
+
+function terminarAprendizaje() {
+    learningButtons.style.display = "none";
+
+    const nuevoPersonaje = {
+        nombre: nuevoNombre,
+        atributos: nuevosAtributos
+    };
+
+    const extra = cargarExtraDesdeLocalStorage();
+    extra.push(nuevoPersonaje);
+    guardarExtraEnLocalStorage(extra);
+
+    learningQuestion.innerText =
+        "Entrenamiento completado.\nRegistré a " + nuevoNombre + ".";
+    learnFinishMsg.innerText =
+        "La próxima vez podré reconocerlo 😉\n" +
+        "(Guardado en tu navegador.)";
+
+    messageBox.innerText =
+        "Nuevo objetivo agregado:\n" + nuevoNombre +
+        "\nGracias por entrenarme.";
+    statusBox.innerText =
+        "Conocimiento guardado en memoria local.";
+    targetStatus.innerText = "Estado objetivo: BASE ACTUALIZADA";
+    targetStatus.style.color = "#66fcf1";
+
+    aprendiendo = false;
+}
+
+/* ==========================================================
+   9. Eventos botones
+   ========================================================== */
+startBtn.addEventListener("click", iniciarJuego);
+restartBtn.addEventListener("click", reiniciarJuego);
+
+yesBtn.addEventListener("click", () => responder(true));
+noBtn.addEventListener("click", () => responder(false));
+
+/* ==========================================================
+   10. Init al cargar
+   ========================================================== */
+(function init() {
+    const extra = cargarExtraDesdeLocalStorage();
+    posibles = personajesBase.concat(extra);
+    refrescarScanner();
+})();
+</script>
+
+</body>
+</html>
